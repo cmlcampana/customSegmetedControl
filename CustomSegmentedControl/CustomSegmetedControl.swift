@@ -27,7 +27,6 @@ class CustomSegmentedControl: UIControl {
         }
     }
 
-
     @IBInspectable var selectorColor: UIColor = UIColor(displayP3Red: 0.3, green: 0.68, blue: 1.0, alpha: 1.0) {
         didSet {
             updateView()
@@ -35,6 +34,12 @@ class CustomSegmentedControl: UIControl {
     }
 
     @IBInspectable var selectorTextColor: UIColor = UIColor(displayP3Red: 0.3, green: 0.68, blue: 1.0, alpha: 1.0) {
+        didSet {
+            updateView()
+        }
+    }
+
+    @IBInspectable var lineColor: UIColor = UIColor(red: 0.91, green: 0.91, blue: 0.91, alpha: 0.7) {
         didSet {
             updateView()
         }
@@ -72,7 +77,7 @@ class CustomSegmentedControl: UIControl {
         let firstButton = buttons[0]
         firstButton.setTitleColor(selectorTextColor, for: .normal)
 
-        selector = UIView()
+        selector = UIView(frame: CGRect(x: 0, y: 40, width: 64, height: 3))
         selector.backgroundColor = selectorColor
         addSubview(selector)
 
@@ -92,7 +97,7 @@ class CustomSegmentedControl: UIControl {
 
 
         let line = UIView.init(frame: .zero)
-        line.backgroundColor = UIColor(red: 0.91, green: 0.91, blue: 0.91, alpha: 0.7)
+        line.backgroundColor = lineColor
         addSubview(line)
         line.setPosition(topAnchor: stackView.bottomAnchor, bottomAnchor: line.bottomAnchor,
                          leadingAnchor: self.leadingAnchor, trailingAnchor: self.trailingAnchor)
@@ -118,22 +123,6 @@ class CustomSegmentedControl: UIControl {
 
         sendActions(for: .valueChanged)
     }
-
-    //    override func sendActions(for controlEvents: UIControlEvents) {
-    //
-    //        super.sendActions(for: controlEvents)
-    //
-    //        let  selectorStartPosition = frame.width / CGFloat(buttons.count) * CGFloat(selectedSegmentIndex)
-    //
-    //        UIView.animate(withDuration: 0.3, animations: {
-    //
-    //            self.selector.frame.origin.x = selectorStartPosition
-    //        })
-    //
-    //        buttons[selectedSegmentIndex].setTitleColor(selectorTextColor, for: .normal)
-    //
-    //    }
-
 }
 
 extension UIView {
