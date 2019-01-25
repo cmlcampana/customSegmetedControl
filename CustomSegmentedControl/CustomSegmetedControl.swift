@@ -11,9 +11,10 @@ import UIKit
 @IBDesignable
 class CustomSegmentedControl: UIControl {
 
-    var buttons = [UIButton]()
-    var selector: UIView!
     var selectedSegmentIndex = 0
+    private var buttons = [UIButton]()
+    private var selector: UIView!
+    private var widthFrame: CGFloat?
 
     @IBInspectable var commaSeperatedButtonTitles: String = "" {
         didSet {
@@ -45,23 +46,50 @@ class CustomSegmentedControl: UIControl {
         }
     }
 
-    override init(frame: CGRect) {
+    init(frame: CGRect, width: CGFloat) {
+        self.widthFrame = width
         super.init(frame: frame)
         updateView()
     }
 
     required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
         fatalError("init(coder:) has not been implemented")
     }
-
-
+    
     func updateView() {
-        buttons.removeAll()
-
         subviews.forEach { (view) in
             view.removeFromSuperview()
         }
+
+        initializeButtons()
+        let stackView = createStackView()
+        initializeSelector(button: buttons[0])
+        selector.topAnchor.constraint(equalTo: stackView.bottomAnchor).isActive = true
+
+        let line = UIView.init(frame: .zero)
+        line.backgroundColor = lineColor
+        addSubview(line)
+        line.setPosition(topAnchor: selector.bottomAnchor, bottomAnchor: line.bottomAnchor,
+                         leadingAnchor: self.leadingAnchor, trailingAnchor: self.trailingAnchor)
+        line.heightAnchor.constraint(equalToConstant: 1).isActive = true
+    }
+
+    private func createStackView() -> UIStackView {
+        let stackView = UIStackView.init(arrangedSubviews: buttons)
+        stackView.axis = .horizontal
+        stackView.alignment = .fill
+        stackView.distribution = .fillEqually
+        stackView.spacing = 0.0
+        addSubview(stackView)
+
+        stackView.setPosition(topAnchor: self.topAnchor, bottomAnchor: self.bottomAnchor,
+                              leadingAnchor: self.leadingAnchor, trailingAnchor: self.trailingAnchor)
+
+        return stackView
+    }
+
+    private func initializeButtons() {
+        buttons.removeAll()
         let buttonTitles = commaSeperatedButtonTitles.components(separatedBy: ",")
         for buttonTitle in buttonTitles {
 
@@ -76,46 +104,35 @@ class CustomSegmentedControl: UIControl {
 
         let firstButton = buttons[0]
         firstButton.setTitleColor(selectorTextColor, for: .normal)
+    }
 
-        selector = UIView(frame: CGRect(x: 0, y: 40, width: 64, height: 3))
+    private func initializeSelector(button: UIButton) {
+        selector = UIView.init(frame: .zero)
+        selector.layer.masksToBounds = true
+        selector.layer.cornerRadius = 2
         selector.backgroundColor = selectorColor
         addSubview(selector)
-
-        // Create a StackView
-        let stackView = UIStackView.init(arrangedSubviews: buttons)
-        stackView.axis = .horizontal
-        stackView.alignment = .fill
-        stackView.distribution = .fillEqually
-        stackView.spacing = 0.0
-        addSubview(stackView)
-
-        stackView.setPosition(topAnchor: self.topAnchor, bottomAnchor: self.bottomAnchor,
-                              leadingAnchor: self.leadingAnchor, trailingAnchor: self.trailingAnchor)
-
         selector.translatesAutoresizingMaskIntoConstraints = false
-        selector.topAnchor.constraint(equalTo: stackView.bottomAnchor, constant: 10).isActive = true
+        selector.bottomAnchor.constraint(equalTo: selector.bottomAnchor).isActive = true
+        let startPosition = ((self.widthFrame! / 2) / 2) - 32
+        selector.leadingAnchor.constraint(equalTo: button.leadingAnchor, constant: startPosition).isActive = true
+        selector.heightAnchor.constraint(equalToConstant: 3).isActive = true
+        selector.widthAnchor.constraint(equalToConstant: 64).isActive = true
+    }
 
-
-        let line = UIView.init(frame: .zero)
-        line.backgroundColor = lineColor
-        addSubview(line)
-        line.setPosition(topAnchor: stackView.bottomAnchor, bottomAnchor: line.bottomAnchor,
-                         leadingAnchor: self.leadingAnchor, trailingAnchor: self.trailingAnchor)
-        line.heightAnchor.constraint(equalToConstant: 1).isActive = true
+    private func setSelectorPosition(index: Int, button: UIButton) {
+        let  selectorStartPosition = frame.width / CGFloat(buttons.count) * CGFloat(index)
+        UIView.animate(withDuration: 0.2, animations: {
+            self.selector.frame.origin.x = selectorStartPosition + (button.frame.width / 2 - 32)
+        })
     }
 
     @objc func buttonTapped(button: UIButton) {
-        for (buttonIndex,btn) in buttons.enumerated() {
+        for (buttonIndex, btn) in buttons.enumerated() {
             btn.setTitleColor(textColor, for: .normal)
 
             if btn == button {
-                let  selectorStartPosition = frame.width / CGFloat(buttons.count) * CGFloat(buttonIndex) +
-                    ((self.frame.width / 2) / 2) - 32
-
-                UIView.animate(withDuration: 0.2, animations: {
-                    self.selector.frame.origin.x = selectorStartPosition
-                })
-
+                setSelectorPosition(index: buttonIndex, button: btn)
                 btn.setTitleColor(selectorTextColor, for: .normal)
                 selectedSegmentIndex = buttonIndex
             }

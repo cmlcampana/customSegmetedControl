@@ -53,7 +53,7 @@ class MasterViewController: UIViewController {
     }
 
     private func setupSegmentedControl() {
-        segmentedControl = CustomSegmentedControl()
+        segmentedControl = CustomSegmentedControl(frame: .zero, width: self.view.frame.width)
 
         segmentedControl.backgroundColor = .white
         segmentedControl.commaSeperatedButtonTitles = "Meus Produtos, Visita Técnica"
